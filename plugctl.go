@@ -104,7 +104,6 @@ func (p *plug) disableAP() {
 	fmt.Print("disabling AP...")
 	p.exec(plugDisableAP)
 	result := p.exec(plugIfconfig)
-	fmt.Println(result)
 	if strings.Contains(result, "ra0") {
 		fmt.Println("failed")
 	} else {
