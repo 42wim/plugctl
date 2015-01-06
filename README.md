@@ -14,7 +14,16 @@ $ plugctl
                 V = milliVolts
                 I = milliAmps
   -ip="192.168.8.74": ipv4 address of smartplug device
+  -raw="": raw command to execute
 ```
+
+-do enable / disable: to enable/disable the power output of the plug  
+-do disableAP: to disable AP mode on the smartplug (for security reasons)  
+-do uptime: show uptime of the device  
+-do reboot: reboots the device (does not impacts the power output)  
+-do info: get information about the power status (needs -info option)  
+   
+-raw "command": executes a command on the plug (it's running busybox/linux)  
 
 ## Examples
 Enable plug on ip 192.168.1.50 with login admin and password test
@@ -36,4 +45,22 @@ $ plugctl -do disableAP
 disabling AP.
 ```
 
+View the CPU info of the device by using the raw command
+```
+$ plugctl.exe -raw="cat /proc/cpuinfo"
+executing command: cat   /proc/cpuinfo
+
+system type             : Ralink SoC
+processor               : 0
+cpu model               : MIPS 24K V4.12
+BogoMIPS                : 239.61
+wait instruction        : yes
+microsecond timers      : yes
+tlb_entries             : 32
+extra interrupt vector  : yes
+hardware watchpoint     : yes
+ASEs implemented        : mips16 dsp
+VCED exceptions         : not available
+VCEI exceptions         : not available
+```
 

@@ -29,7 +29,7 @@ type plug struct {
 
 // helper functions
 func parseTextArea(body string) string {
-	body = strings.Replace(body, "\n", "", -1)
+	body = strings.Replace(body, "\n", "||", -1)
 	re := regexp.MustCompile("1\">(.*)</textarea>")
 	result := re.FindStringSubmatch(body)
 	return result[1]
@@ -79,6 +79,7 @@ func (p *plug) disable() {
 
 func (p *plug) uptime() {
 	result := p.exec(plugUptime)
+	result = strings.Replace(result, "||", "", -1)
 	fmt.Println(result)
 }
 
@@ -111,10 +112,19 @@ func (p *plug) disableAP() {
 	}
 }
 
+func (p *plug) raw(command string) {
+	fmt.Println("executing command:", command)
+	command = strings.Replace(command, " ", "+", -1)
+	result := p.exec(command)
+	result = strings.Replace(result, "||", "\n", -1)
+	fmt.Println(result)
+}
+
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
 	do := flag.String("do", "", "enable/disable/info/disableAP/uptime/reboot")
+	raw := flag.String("raw", "", "raw command to execute")
 	info := flag.String("info", "", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
 	flag.Parse()
 	if len(os.Args) == 1 {
@@ -122,6 +132,12 @@ func main() {
 		return
 	}
 	p := plug{*device, *credentials}
+
+	if *raw != "" {
+		p.raw(*raw)
+		return
+	}
+
 	switch *do {
 	case "enable":
 		p.enable()
