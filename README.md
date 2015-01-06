@@ -7,7 +7,7 @@ Based upon information from https://www.dealabs.com/bons-plans/prise-wifi-/85521
 ```
 $ plugctl
   -credentials="admin:admin": credentials specify as <login>:<pass>
-  -do="": enable/disable/info/disableAP
+  -do="": enable/disable/info/disableAP/uptime/reboot
   -info="": W/E/V/I
                 W = centiWatt
                 E = milliWatts/h
