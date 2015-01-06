@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
 
 const plugEnable = "GpioForCrond+1"
@@ -21,6 +22,13 @@ const plugReadResult = "/adm/system_command.asp"
 type plug struct {
 	device      string
 	credentials string
+}
+
+func parseTextArea(body string) string {
+	body = strings.Replace(body, "\n", "", -1)
+	re := regexp.MustCompile("1\">(.*)</textarea>")
+	result := re.FindStringSubmatch(body)
+	return result[1]
 }
 
 func (p *plug) enable() {
@@ -52,8 +60,9 @@ func (p *plug) info(info string) string {
 		log.Fatal("connection failed!")
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
+	textarea := parseTextArea(string(body))
 	re := regexp.MustCompile("01(I|V|W|E)[0-9]+ 0*([0-9]+)")
-	result := re.FindStringSubmatch(string(body))
+	result := re.FindStringSubmatch(textarea)
 	// if we don't have 2 matches something is wrong
 	if len(result) > 2 {
 		return (string(result[2]))
