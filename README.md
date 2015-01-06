@@ -5,9 +5,9 @@ Based upon information from https://www.dealabs.com/bons-plans/prise-wifi-/85521
 
 ## Usage
 ```
-$./plugctl
+$ plugctl
   -credentials="admin:admin": credentials specify as <login>:<pass>
-  -do="": enable/disable/info
+  -do="": enable/disable/info/disableAP
   -info="": W/E/V/I
                 W = centiWatt
                 E = milliWatts/h
@@ -29,4 +29,11 @@ Get centiWatt usage information about plug on ip 192.168.1.50 with default passw
 $ plugctl -ip 192.168.1.50 -info W -do info
 1058 W
 ```
+
+Disable the AP mode on the smartplug (for security reasons). This is not saved on reboot!
+```
+$ plugctl -do disableAP
+disabling AP.
+```
+
 

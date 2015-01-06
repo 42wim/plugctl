@@ -13,6 +13,7 @@ import (
 const plugEnable = "GpioForCrond+1"
 const plugDisable = "GpioForCrond+0"
 const plugInfo = "GetInfo+"
+const plugDisableAP = "ifconfig+ra0+down"
 
 const plugURI = "/goform/SystemCommand?command="
 const plugReadResult = "/adm/system_command.asp"
@@ -61,15 +62,24 @@ func (p *plug) info(info string) string {
 	}
 }
 
+func (p *plug) disableAP() {
+	fmt.Println("disabling AP.")
+	url := "http://" + p.credentials + "@" + p.device + plugURI + plugDisableAP
+	_, err := http.Get(url)
+	if err != nil {
+		log.Fatal("connection failed")
+	}
+}
+
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
-	do := flag.String("do", "", "enable/disable/info")
+	do := flag.String("do", "", "enable/disable/info/disableAP")
 	info := flag.String("info", "", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
 	flag.Parse()
 	if len(os.Args) == 1 {
 		flag.PrintDefaults()
-        return
+		return
 	}
 	p := plug{*device, *credentials}
 	switch *do {
@@ -77,6 +87,8 @@ func main() {
 		p.enable()
 	case "disable":
 		p.disable()
+	case "disableAP":
+		p.disableAP()
 	default:
 		fmt.Println(p.info(*info), *info)
 	}
