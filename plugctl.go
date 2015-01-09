@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -28,6 +30,21 @@ type plug struct {
 }
 
 // helper functions
+
+func checkErr(err error) {
+	if err != nil {
+		log.Fatalln("Error:", err)
+	}
+}
+
+func sendln(conn net.Conn, s string, wait byte) string {
+	_, err := fmt.Fprintf(conn, s+"\n")
+	checkErr(err)
+	status, err := bufio.NewReader(conn).ReadString(wait)
+	checkErr(err)
+	return status
+}
+
 func parseTextArea(body string) string {
 	body = strings.Replace(body, "\n", "||", -1)
 	re := regexp.MustCompile("1\">(.*)</textarea>")
@@ -119,12 +136,28 @@ func (p *plug) raw(command string) {
 	fmt.Println(result)
 }
 
+// use telnet connection
+func (p *plug) rawt(command string) {
+	conn, err := net.Dial("tcp", p.device+":23")
+	if err != nil {
+		log.Fatal("can't connect")
+	}
+	sendln(conn, "", '\n')
+	sendln(conn, "admin", '\n')
+	sendln(conn, "admin", '#')
+	status := sendln(conn, command, '#')
+	status = strings.Replace(status, command+"\r\n", "", 1)
+	status = strings.Replace(status, "#", "", 1)
+	fmt.Print(status)
+}
+
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
-	do := flag.String("do", "", "enable/disable/info/disableAP/uptime/reboot")
-	raw := flag.String("raw", "", "raw command to execute")
-	info := flag.String("info", "", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
+	do := flag.String("do", "info", "enable/disable/info/disableAP/uptime/reboot")
+	raw := flag.String("raw", "", "raw command to execute (via http)")
+	rawt := flag.String("rawt", "", "raw command to execute (via telnet)")
+	info := flag.String("info", "W", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
 	flag.Parse()
 	if len(os.Args) == 1 {
 		flag.PrintDefaults()
@@ -134,6 +167,11 @@ func main() {
 
 	if *raw != "" {
 		p.raw(*raw)
+		return
+	}
+
+	if *rawt != "" {
+		p.rawt(*rawt)
 		return
 	}
 

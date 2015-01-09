@@ -14,7 +14,8 @@ $ plugctl
                 V = milliVolts
                 I = milliAmps
   -ip="192.168.8.74": ipv4 address of smartplug device
-  -raw="": raw command to execute
+  -raw="": raw command to execute (via http)
+  -rawt="": raw command to execute (via telnet)
 ```
 
 -do enable / disable: to enable/disable the power output of the plug  
@@ -23,7 +24,10 @@ $ plugctl
 -do reboot: reboots the device (does not impacts the power output)  
 -do info: get information about the power status (needs -info option)  
    
--raw "command": executes a command on the plug (it's running busybox/linux)  
+-raw "command": executes a command on the plug (it's running busybox/linux)(via http)
+   > sending commands via http is limited, only one command is possible, can't chain commands)
+-rawt "command": executes a command on the plug (it's running busybox/linux)  
+   > here you can chain commands. eg command1 && command2 
 
 ## Examples
 Enable plug on ip 192.168.1.50 with login admin and password test
@@ -47,7 +51,7 @@ disabling AP.
 
 View the CPU info of the device by using the raw command
 ```
-$ plugctl.exe -raw="cat /proc/cpuinfo"
+$ plugctl -raw="cat /proc/cpuinfo"
 executing command: cat   /proc/cpuinfo
 
 system type             : Ralink SoC
@@ -62,5 +66,14 @@ hardware watchpoint     : yes
 ASEs implemented        : mips16 dsp
 VCED exceptions         : not available
 VCEI exceptions         : not available
+```
+
+Get all the usage information Watt/Ampere/Energy/Volt in one go using the rawt command
+```
+$ plugctl -rawt "GetInfo W && GetInfo I && GetInfo E && GetInfo V"
+$01W00 000007
+$01I00 000064
+$01E00 002134
+$01V00 236728
 ```
 
