@@ -139,12 +139,14 @@ func (p *plug) raw(command string) {
 // use telnet connection
 func (p *plug) rawt(command string) {
 	conn, err := net.Dial("tcp", p.device+":23")
+	s := strings.Split(p.credentials, ":")
+	login, pass := s[0], s[1]
 	if err != nil {
 		log.Fatal("can't connect")
 	}
 	sendln(conn, "", '\n')
-	sendln(conn, "admin", '\n')
-	sendln(conn, "admin", '#')
+	sendln(conn, login, '\n')
+	sendln(conn, pass, '#')
 	status := sendln(conn, command, '#')
 	status = strings.Replace(status, command+"\r\n", "", 1)
 	status = strings.Replace(status, "#", "", 1)
