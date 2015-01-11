@@ -104,7 +104,7 @@ func (p *plug) DialTimeout(network, address string, timeout time.Duration) (net.
 
 // use telnet connection
 func (p *plug) rawt(command string) {
-	conn, err := p.DialTimeout("tcp", p.device+":23", 30)
+	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
 	if err != nil {
 		log.Fatal("can't connect")
 	}
@@ -134,7 +134,7 @@ func (p *plug) daemon() {
 	diskwriter := csv.NewWriter(csvfile)
 
 	// connect via telnet to the device and login
-	conn, err := p.DialTimeout("tcp", p.device+":23", time.Duration(time.Second*30))
+	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
 	if err != nil {
 		log.Fatal("can't connect")
 	}
