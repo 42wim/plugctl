@@ -21,6 +21,7 @@ func main() {
 	rawt := flag.String("rawt", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
 	port := flag.Int("port", 8080, "webserver port (only used with -daemon)")
+	delay := flag.Int("delay", 1, "polling delay of statistics in seconds (only used with -daemon)")
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
 	info := flag.String("info", "W", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
@@ -36,7 +37,7 @@ func main() {
 		*device = *device + ":23"
 	}
 
-	p := plug{device: *device, credentials: *credentials, csvfile: *csvfile}
+	p := plug{device: *device, credentials: *credentials, csvfile: *csvfile, delay: *delay}
 
 	if *raw != "" {
 		p.raw(*raw)

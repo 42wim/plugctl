@@ -21,6 +21,7 @@ type plug struct {
 	csvfile     string
 	latestEntry []byte
 	buffer      bytes.Buffer
+	delay       int
 }
 
 // plug methods
@@ -209,7 +210,7 @@ func (p *plug) daemon() {
 			fmt.Print(record)
 			fmt.Println(" took", time.Since(start))
 		}
-		// sleep the right amount of time (exactly 1 second)
-		time.Sleep(time.Second - time.Since(start))
+		// sleep the right amount of time
+		time.Sleep(time.Second*time.Duration(p.delay) - time.Since(start))
 	}
 }
