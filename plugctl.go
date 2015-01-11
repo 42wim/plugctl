@@ -18,7 +18,7 @@ func main() {
 	do := flag.String("do", "info", "enable/disable/info/disableAP/uptime/reboot")
 	raw := flag.String("raw", "", "raw command to execute on device (via http)")
 	rawt := flag.String("rawt", "", "raw command to execute on device (via telnet)")
-	daemon := flag.Bool("daemon", true, "run as a (foreground) daemon with polling webserver")
+	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
 	port := flag.Int("port", 8080, "webserver port (only used with -daemon)")
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
