@@ -169,8 +169,13 @@ func (p *plug) daemon() {
 		// for each GetInfo result, do a regexp match, adjust value and create a CSV record
 		for i, result := range results {
 			match := re.FindStringSubmatch(result)
-			value := match[2]
-			temp, _ := strconv.ParseFloat(match[2], 32)
+			value := "0"
+			// check if we got the right size of slice
+			if len(match) == 3 {
+				value = match[2]
+			}
+
+			temp, _ := strconv.ParseFloat(value, 32)
 
 			switch i {
 			// centiWatt -> Watt
