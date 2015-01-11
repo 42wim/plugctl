@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var debug bool = false
@@ -31,6 +32,10 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
+	if strings.Contains(*device, ":") == false {
+		*device = *device + ":23"
+	}
+
 	p := plug{device: *device, credentials: *credentials, csvfile: *csvfile}
 
 	if *raw != "" {
