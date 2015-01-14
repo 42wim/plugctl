@@ -16,7 +16,7 @@ var debug bool = false
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
-	do := flag.String("do", "info", "enable/disable/info/disableAP/uptime/reboot")
+	do := flag.String("do", "info", "enable/disable/info/disableAP/enableCloud/disableCloud/uptime/reboot")
 	raw := flag.String("raw", "", "raw command to execute on device (via http)")
 	rawt := flag.String("rawt", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
@@ -34,7 +34,11 @@ func main() {
 		return
 	}
 	if strings.Contains(*device, ":") == false {
-		*device = *device + ":23"
+		if *do != "" {
+			*device = *device + ":80"
+		} else {
+			*device = *device + ":23"
+		}
 	}
 
 	p := plug{device: *device, credentials: *credentials, csvfile: *csvfile, delay: *delay}
@@ -67,6 +71,10 @@ func main() {
 		p.disable()
 	case "disableAP":
 		p.disableAP()
+	case "disableCloud":
+		p.disableCloud()
+	case "enableCloud":
+		p.enableCloud()
 	case "uptime":
 		p.uptime()
 	case "reboot":

@@ -82,6 +82,34 @@ func (p *plug) disableAP() {
 	}
 }
 
+func (p *plug) disableCloud() {
+	fmt.Println("disabling Cloud Access...")
+	for _, address := range plugDisableCloudAddresses {
+		fmt.Print("blocking " + address + " ...")
+		p.exec(plugRoute + "+add+" + address + "+dev+lo")
+		result := p.exec(plugRoute)
+		if strings.Contains(result, address) {
+			fmt.Println("success")
+		} else {
+			fmt.Println("failed")
+		}
+	}
+}
+
+func (p *plug) enableCloud() {
+	fmt.Println("enabling Cloud Access...")
+	for _, address := range plugDisableCloudAddresses {
+		fmt.Print("unblocking " + address + " ...")
+		p.exec(plugRoute + "+del+" + address + "+dev+lo")
+		result := p.exec(plugRoute)
+		if strings.Contains(result, address) {
+			fmt.Println("failed")
+		} else {
+			fmt.Println("success")
+		}
+	}
+}
+
 func (p *plug) raw(command string) {
 	fmt.Println("executing command:", command)
 	command = strings.Replace(command, " ", "+", -1)
