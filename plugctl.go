@@ -34,7 +34,7 @@ func main() {
 		return
 	}
 	if strings.Contains(*device, ":") == false {
-		if *do != "" {
+		if *do != "" && !*daemon {
 			*device = *device + ":80"
 		} else {
 			*device = *device + ":23"
