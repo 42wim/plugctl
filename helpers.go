@@ -55,7 +55,11 @@ func printResultSuccess(result string) {
 func readcsv(csvfile string) []byte {
 	contents, err := ioutil.ReadFile(csvfile)
 	if err != nil {
-		fmt.Println("error", err)
+		if os.IsNotExist(err) {
+			// fmt.Println("file does not exist")
+		} else {
+			fmt.Println("error", err)
+		}
 	}
 	return contents
 }

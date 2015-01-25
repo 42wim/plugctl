@@ -147,6 +147,7 @@ func (p *plug) daemon() {
 	fmt.Println("starting foreground daemon ;-)")
 
 	// write csv from disk into the buffer
+	fmt.Println("loading history (" + p.csvfile + ")")
 	p.buffer.Write(readcsv(p.csvfile))
 
 	// create/append the csvfile on disk
