@@ -62,8 +62,9 @@ const webStream = `<html>
 	    });
 
 	window.intervalId = setInterval(function () {
-		 	$.getJSON('/read.json', function(data) {
-		 	d.push([new Date(),data[1],data[2],data[3],data[4]])
+		 	now = new Date();
+		 	$.getJSON('/read.json?t='+now.toString(), function(data) {
+		 	d.push([now,data[1],data[2],data[3],data[4]])
 		    g.updateOptions( { 'file': d } );
 	        });
 	      }, 1000);
