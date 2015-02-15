@@ -3,6 +3,21 @@
 Control your Smartplug from Maginon / Aldi  
 Based upon information from https://www.dealabs.com/bons-plans/prise-wifi-/85521?page=36 and https://github.com/netdata/loxone/tree/master/maginon_Smart-Plug
 
+## Build
+Install Go using your package manager or from the website https://golang.org/doc/install  
+Download the plugctl source or use git 
+
+Example
+
+```
+$ git clone https://github.com/42wim/plugctl.git
+$ cd plugctl
+$ go build
+```
+
+You will now have the plugctl executable in the same directory
+
+
 ## Usage
 ```
 $ plugctl
