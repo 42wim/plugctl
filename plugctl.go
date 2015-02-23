@@ -73,7 +73,7 @@ func main() {
 		case "power":
 			p.enable()
 		case "ap":
-			//		p.enableAP();
+			p.enableAP()
 		case "cloud":
 			p.enableCloud()
 		}

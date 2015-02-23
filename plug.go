@@ -80,6 +80,43 @@ func (p *plug) disableAP() {
 	} else {
 		fmt.Println("success")
 	}
+	result = p.exec(plugGetAP)
+	fmt.Print("saving state...")
+	if result == plugResultAPundef || result == plugResultAPon {
+		_ = p.exec(plugSetAP + "+0")
+		result = p.exec(plugGetAP)
+		if result == plugResultAPoff {
+			fmt.Println("success")
+		} else {
+			fmt.Println("failed")
+		}
+	} else {
+		fmt.Println("already set")
+	}
+}
+
+func (p *plug) enableAP() {
+	fmt.Print("enabling AP...")
+	p.exec(plugEnableAP)
+	result := p.exec(plugIfconfig)
+	if strings.Contains(result, "ra0") {
+		fmt.Println("success")
+	} else {
+		fmt.Println("failed")
+	}
+	result = p.exec(plugGetAP)
+	fmt.Print("saving state...")
+	if result == plugResultAPundef || result == plugResultAPoff {
+		_ = p.exec(plugSetAP + "+1")
+		result = p.exec(plugGetAP)
+		if result == plugResultAPon {
+			fmt.Println("success")
+		} else {
+			fmt.Println("failed")
+		}
+	} else {
+		fmt.Println("already set")
+	}
 }
 
 func (p *plug) disableCloud() {

@@ -5,11 +5,18 @@ const (
 	plugDisable      = "GpioForCrond+0"
 	plugInfo         = "GetInfo+"
 	plugDisableAP    = "ifconfig+ra0+down"
+	plugEnableAP     = "ifconfig+ra0+up"
+	plugSetAP        = "nvram_set+Ra0up"
+	plugGetAP        = "nvram_get+Ra0up"
 	plugIfconfig     = "ifconfig"
 	plugUptime       = "uptime"
 	plugReboot       = "reboot"
 	plugRoute        = "route"
 	plugGetInfoStats = "GetInfo I && GetInfo W && GetInfo E && GetInfo V"
+
+	plugResultAPoff   = "||0||||        "
+	plugResultAPon    = "||1||||        "
+	plugResultAPundef = "||||||        "
 
 	plugURI        = "/goform/SystemCommand?command="
 	plugReadResult = "/adm/system_command.asp"
