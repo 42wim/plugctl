@@ -16,9 +16,9 @@ var debug bool = false
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
-	enable := flag.String("enable", "", "power/cloud/ap")
-	disable := flag.String("disable", "", "power/cloud/ap")
-	show := flag.String("show", "", "info/uptime")
+	enable := flag.String("enable", "", "enable power/cloud/ap")
+	disable := flag.String("disable", "", "disable power/cloud/ap")
+	show := flag.String("show", "", "show info/uptime")
 	raw := flag.String("raw", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
 	port := flag.Int("port", 8080, "webserver port (only used with -daemon)")
