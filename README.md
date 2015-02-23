@@ -25,30 +25,30 @@ $ plugctl
   -csvfile="output.csv": file to write csv output to (only used with -daemon)
   -daemon=false: run as a (foreground) daemon with polling webserver
   -debug=false: show debug information
-  -do="info": enable/disable/info/disableAP/uptime/reboot
-  -info="W": W/E/V/I
-                W = centiWatt
-                E = milliWatts/h
-                V = milliVolts
-                I = milliAmps
+  -delay=1: polling delay of statistics in seconds (only used with -daemon)
+  -disable="": disable power/cloud/ap
+  -enable="": enable power/cloud/ap
   -ip="192.168.8.74": ipv4 address of smartplug device
   -port=8080: webserver port (only used with -daemon)
-  -raw="": raw command to execute on device (via http)
-  -rawt="": raw command to execute on device (via telnet)
+  -raw="": raw command to execute on device (via telnet)
+  -show="": show info/uptime
 ```
 
--do enable / disable: to enable/disable the power output of the plug  
--do disableAP: to disable AP mode on the smartplug (for security reasons)  
--do uptime: show uptime of the device  
--do reboot: reboots the device (does not impacts the power output)  
--do info: get information about the power status (needs -info option)  
+- enable
+  * power : enable power output of the plug  
+  * ap: disable AP mode on the smartplug (for security reasons). Also saved in NVRAM (survives reboot/powerfailure)  
+  * cloud: disable connections from smartplug to the cloud (iotc). Does not survive a reboot/powerfailure!  
+
+- disable: opposite of enable options above  
+
+- show
+  * info: shows current Ampere - Watt - Watt/hour - Volt usage  
+  * uptime: show uptime of the device
    
--raw "command": executes a command on the plug (it's running busybox/linux)(via http)
-   > sending commands via http is limited, only one command is possible, can't chain commands)
--rawt "command": executes a command on the plug (it's running busybox/linux)  
+- raw "command": executes a command on the plug (it's running busybox/linux)  
    > here you can chain commands. eg command1 && command2 
 
--daemon: starts a webserver and polls the device every second for information  
+- daemon: starts a webserver and polls the device every second for information  
    > - port: specify listen port for the webserver (default 8080) (only needed with -daemon)
    > - csvfile: specify cvsfile to write to (default "output.csv") (only needed with -daemon)
 
@@ -66,27 +66,26 @@ When -daemon option is used, a webserver will listen by default on port 8080
 Enable plug on ip 192.168.1.50 with login admin and password test
 
 ```
-$ plugctl -ip 192.168.1.50 -credentials "admin:test" -do enable
+$ plugctl -ip 192.168.1.50 -credentials "admin:test" -enable power
 enabling plug.
 ```
 
-Get centiWatt usage information about plug on ip 192.168.1.50 with default password
+Get usage information about plug on ip 192.168.1.50 with default password
 ```
-$ plugctl -ip 192.168.1.50 -info W -do info
-1058 W
+$ plugctl -ip 192.168.1.50 -show info
+0.01 Ampere - 0.07 Watt - 0.00 Watt/hour - 230.90 Volt
 ```
 
-Disable the AP mode on the smartplug (for security reasons). This is not saved on reboot!
+Disable the AP mode on the smartplug (for security reasons). This is saved on reboot!
 ```
-$ plugctl -do disableAP
-disabling AP.
+$ plugctl -disable ap
+disabling AP...success
+saving state...already set
 ```
 
 View the CPU info of the device by using the raw command
 ```
 $ plugctl -raw="cat /proc/cpuinfo"
-executing command: cat   /proc/cpuinfo
-
 system type             : Ralink SoC
 processor               : 0
 cpu model               : MIPS 24K V4.12
@@ -103,7 +102,7 @@ VCEI exceptions         : not available
 
 Get all the usage information Watt/Ampere/Energy/Volt in one go using the rawt command
 ```
-$ plugctl -rawt "GetInfo W && GetInfo I && GetInfo E && GetInfo V"
+$ plugctl -raw "GetInfo W && GetInfo I && GetInfo E && GetInfo V"
 $01W00 000007
 $01I00 000064
 $01E00 002134
