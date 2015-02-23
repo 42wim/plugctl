@@ -71,6 +71,54 @@ func (p *plug) info(info string) string {
 	}
 }
 
+func (p *plug) infofull() string {
+	resultStr := ""
+	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*3))
+	if err != nil {
+		log.Fatal("can't connect")
+	}
+	// get statistics from device and cleanup
+	status := sendln(conn, plugGetInfoStats, '#')
+	status = strings.Replace(status, plugGetInfoStats+"\r\n", "", 1)
+	status = strings.Replace(status, "#", "", 1)
+	// split up the 4 results a newline
+	results := strings.SplitN(status, "\r\n", 4)
+
+	re := regexp.MustCompile("01(I|V|W|E)[0-9]+ 0*([0-9]+)")
+	// for each GetInfo result, do a regexp match, adjust value and create a CSV record
+	for i, result := range results {
+		match := re.FindStringSubmatch(result)
+		value := "0"
+		// check if we got the right size of slice
+		if len(match) == 3 {
+			value = match[2]
+		}
+
+		temp, _ := strconv.ParseFloat(value, 32)
+
+		switch i {
+		case 0:
+			// mAmp/10 -> Amp
+			value = strconv.FormatFloat(temp/10000, 'f', 2, 32)
+			value = value + " Ampere - "
+			// centiWatt -> Watt
+		case 1:
+			value = strconv.FormatFloat(temp/100, 'f', 2, 32)
+			value = value + " Watt - "
+			// mWatt/h -> Watt/h
+		case 2:
+			value = strconv.FormatFloat(temp/1000, 'f', 2, 32)
+			value = value + " Watt/hour - "
+			// mVolt -> Volt
+		case 3:
+			value = strconv.FormatFloat(temp/1000, 'f', 2, 32)
+			value = value + " Volt"
+		}
+		resultStr = resultStr + value
+	}
+	return resultStr
+}
+
 func (p *plug) disableAP() {
 	fmt.Print("disabling AP...")
 	p.exec(plugDisableAP)

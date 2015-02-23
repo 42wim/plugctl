@@ -19,14 +19,12 @@ func main() {
 	enable := flag.String("enable", "", "power/cloud/ap")
 	disable := flag.String("disable", "", "power/cloud/ap")
 	show := flag.String("show", "", "info/uptime")
-	raw := flag.String("raw", "", "raw command to execute on device (via http)")
-	rawt := flag.String("rawt", "", "raw command to execute on device (via telnet)")
+	raw := flag.String("raw", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
 	port := flag.Int("port", 8080, "webserver port (only used with -daemon)")
 	delay := flag.Int("delay", 1, "polling delay of statistics in seconds (only used with -daemon)")
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
-	info := flag.String("info", "W", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
 
 	flag.Parse()
 
@@ -38,7 +36,7 @@ func main() {
 	}
 
 	if strings.Contains(*device, ":") == false {
-		if *show != "" && !*daemon {
+		if (!*daemon) && (*show != "info") && (*raw=="") {
 			*device = *device + ":80"
 		} else {
 			*device = *device + ":23"
@@ -48,12 +46,7 @@ func main() {
 	p := plug{device: *device, credentials: *credentials, csvfile: *csvfile, delay: *delay}
 
 	if *raw != "" {
-		p.raw(*raw)
-		return
-	}
-
-	if *rawt != "" {
-		p.rawt(*rawt)
+		p.rawt(*raw)
 		return
 	}
 
@@ -97,7 +90,7 @@ func main() {
 		case "uptime":
 			p.uptime()
 		case "info":
-			fmt.Println(p.info(*info), *info)
+			fmt.Println(p.infofull())
 		}
 		return
 	}

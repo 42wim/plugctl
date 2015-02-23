@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func checkErr(err error) {
@@ -22,6 +23,7 @@ func checkErr(err error) {
 func sendln(conn net.Conn, s string, wait byte) string {
 	_, err := fmt.Fprintf(conn, s+"\n")
 	checkErr(err)
+	time.Sleep(time.Millisecond * 50)
 	status, err := bufio.NewReader(conn).ReadString(wait)
 	checkErr(err)
 	return status
