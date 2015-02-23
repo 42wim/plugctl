@@ -16,7 +16,9 @@ var debug bool = false
 func main() {
 	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
-	do := flag.String("do", "info", "enable/disable/info/disableAP/enableCloud/disableCloud/uptime/reboot")
+	enable := flag.String("enable", "", "power/cloud/ap")
+	disable := flag.String("disable", "", "power/cloud/ap")
+	show := flag.String("show", "", "info/uptime")
 	raw := flag.String("raw", "", "raw command to execute on device (via http)")
 	rawt := flag.String("rawt", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
@@ -25,6 +27,7 @@ func main() {
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
 	info := flag.String("info", "W", "W/E/V/I\n\t\tW = centiWatt \n\t\tE = milliWatts/h\n\t\tV = milliVolts\n\t\tI = milliAmps")
+
 	flag.Parse()
 
 	debug = *mydebug
@@ -33,8 +36,9 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
+
 	if strings.Contains(*device, ":") == false {
-		if *do != "" && !*daemon {
+		if *show != "" && !*daemon {
 			*device = *device + ":80"
 		} else {
 			*device = *device + ":23"
@@ -64,24 +68,38 @@ func main() {
 		return
 	}
 
-	switch *do {
-	case "enable":
-		p.enable()
-	case "disable":
-		p.disable()
-	case "disableAP":
-		p.disableAP()
-	case "disableCloud":
-		p.disableCloud()
-	case "enableCloud":
-		p.enableCloud()
-	case "uptime":
-		p.uptime()
-	case "reboot":
-		p.reboot()
-	case "info":
-		fmt.Println(p.info(*info), *info)
-	default:
-		flag.PrintDefaults()
+	if *enable != "" {
+		switch *enable {
+		case "power":
+			p.enable()
+		case "ap":
+			//		p.enableAP();
+		case "cloud":
+			p.enableCloud()
+		}
+		return
 	}
+
+	if *disable != "" {
+		switch *disable {
+		case "power":
+			p.disable()
+		case "ap":
+			p.disableAP()
+		case "cloud":
+			p.disableCloud()
+		}
+		return
+	}
+
+	if *show != "" {
+		switch *show {
+		case "uptime":
+			p.uptime()
+		case "info":
+			fmt.Println(p.info(*info), *info)
+		}
+		return
+	}
+	flag.PrintDefaults()
 }
