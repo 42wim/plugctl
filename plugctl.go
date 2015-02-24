@@ -11,10 +11,20 @@ import (
 	"strings"
 )
 
+type config struct {
+	Main struct {
+		Ip          string
+		Credentials string
+		Csvfile     string
+		Port        int
+		Daemon      bool
+	}
+}
+
 var debug bool = false
 
 func main() {
-	device := flag.String("ip", "192.168.8.74", "ipv4 address of smartplug device")
+	device := flag.String("ip", "", "ipv4 address of smartplug device")
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
 	enable := flag.String("enable", "", "enable power/cloud/ap")
 	disable := flag.String("disable", "", "disable power/cloud/ap")
@@ -25,18 +35,43 @@ func main() {
 	delay := flag.Int("delay", 1, "polling delay of statistics in seconds (only used with -daemon)")
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
-
+	cfgfile := flag.String("conf", "", "a valid config file (uses plugctl.conf if exists)")
 	flag.Parse()
+
+	if *cfgfile == "" {
+		if _, err := os.Stat("plugctl.conf"); err == nil {
+			*cfgfile = "plugctl.conf"
+		}
+	}
+
+	if *cfgfile != "" {
+		cfg := readconfig(*cfgfile)
+		if cfg.Main.Ip != "" {
+			*device = cfg.Main.Ip
+		}
+		if cfg.Main.Credentials != "" {
+			*credentials = cfg.Main.Credentials
+		}
+		if cfg.Main.Csvfile != "" {
+			*csvfile = cfg.Main.Csvfile
+		}
+		if strconv.Itoa(cfg.Main.Port) != "" {
+			*port = cfg.Main.Port
+		}
+		if cfg.Main.Daemon {
+			*daemon = true
+		}
+	}
 
 	debug = *mydebug
 
-	if len(os.Args) == 1 {
+	if len(os.Args) == 1 && !*daemon {
 		flag.PrintDefaults()
 		return
 	}
 
 	if strings.Contains(*device, ":") == false {
-		if (!*daemon) && (*show != "info") && (*raw=="") {
+		if (!*daemon) && (*show != "info") && (*raw == "") {
 			*device = *device + ":80"
 		} else {
 			*device = *device + ":23"
@@ -56,7 +91,6 @@ func main() {
 			log.Fatal(err)
 		}
 		go http.Serve(listener, nil)
-		//go http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 		p.daemon()
 		return
 	}

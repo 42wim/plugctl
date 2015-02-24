@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"code.google.com/p/gcfg"
 	"encoding/csv"
 	"fmt"
 	"io/ioutil"
@@ -64,6 +65,19 @@ func readcsv(csvfile string) []byte {
 		}
 	}
 	return contents
+}
+
+func readconfig(cfgfile string) config {
+	var cfg config
+	content, err := ioutil.ReadFile(cfgfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = gcfg.ReadStringInto(&cfg, string(content))
+	if err != nil {
+		log.Fatal("Failed to parse "+cfgfile+":", err)
+	}
+	return cfg
 }
 
 // webhandlers
