@@ -1,0 +1,7 @@
+[Main]
+ip=192.168.2.107
+port=8000
+csvfile=plug1.csv
+#credentials=admin:admin
+#daemon
+
