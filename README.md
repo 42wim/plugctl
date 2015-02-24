@@ -21,6 +21,7 @@ You will now have the plugctl executable in the same directory
 ## Usage
 ```
 $ plugctl
+  -conf="": a valid config file (uses plugctl.conf if exists)
   -credentials="admin:admin": credentials specify as <login>:<pass>
   -csvfile="output.csv": file to write csv output to (only used with -daemon)
   -daemon=false: run as a (foreground) daemon with polling webserver
@@ -51,6 +52,14 @@ $ plugctl
 - daemon: starts a webserver and polls the device every second for information  
    > - port: specify listen port for the webserver (default 8080) (only needed with -daemon)
    > - csvfile: specify cvsfile to write to (default "output.csv") (only needed with -daemon)
+
+## Configfile
+See plugctl.conf.sample (https://github.com/42wim/plugctl/blob/master/plugctl.conf.sample)
+
+If plugctl.conf exists in the current directory it will be used, otherwise a config file can specified using the -conf flag  
+
+E.g. The ip of your plug can be specified in plugctl.conf, so you don't need to give the -ip option with every command  
+
 
 ## Webserver
 When -daemon option is used, a webserver will listen by default on port 8080
