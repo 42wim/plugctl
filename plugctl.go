@@ -18,6 +18,8 @@ type config struct {
 		Csvfile     string
 		Port        int
 		Daemon      bool
+		WebWidth    string
+		WebHeight   string
 	}
 }
 
@@ -36,6 +38,7 @@ func main() {
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
 	cfgfile := flag.String("conf", "", "a valid config file (uses plugctl.conf if exists)")
+
 	flag.Parse()
 
 	if *cfgfile == "" {
@@ -61,7 +64,20 @@ func main() {
 		if cfg.Main.Daemon {
 			*daemon = true
 		}
+		if cfg.Main.WebHeight != "" {
+			webHistory = strings.Replace(webHistory, "##WebHeight##", cfg.Main.WebHeight, -1)
+			webStream = strings.Replace(webStream, "##WebHeight##", cfg.Main.WebHeight, -1)
+		}
+		if cfg.Main.WebWidth != "" {
+			webHistory = strings.Replace(webHistory, "##WebWidth##", cfg.Main.WebWidth, -1)
+			webStream = strings.Replace(webStream, "##WebWidth##", cfg.Main.WebWidth, -1)
+		}
 	}
+
+	webHistory = strings.Replace(webHistory, "##WebHeight##", WebHeight, -1)
+	webHistory = strings.Replace(webHistory, "##WebWidth##", WebWidth, -1)
+	webStream = strings.Replace(webStream, "##WebHeight##", WebHeight, -1)
+	webStream = strings.Replace(webStream, "##WebWidth##", WebWidth, -1)
 
 	debug = *mydebug
 
