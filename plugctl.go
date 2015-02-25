@@ -55,7 +55,7 @@ func main() {
 		if cfg.Main.Csvfile != "" {
 			*csvfile = cfg.Main.Csvfile
 		}
-		if strconv.Itoa(cfg.Main.Port) != "" {
+		if strconv.Itoa(cfg.Main.Port) != "0" {
 			*port = cfg.Main.Port
 		}
 		if cfg.Main.Daemon {
