@@ -30,7 +30,8 @@ func main() {
 	credentials := flag.String("credentials", "admin:admin", "credentials specify as <login>:<pass>")
 	enable := flag.String("enable", "", "enable power/cloud/ap")
 	disable := flag.String("disable", "", "disable power/cloud/ap")
-	show := flag.String("show", "", "show info/uptime")
+	toggle := flag.String("toggle", "", "toggle power")
+	show := flag.String("show", "", "show info/uptime/power")
 	raw := flag.String("raw", "", "raw command to execute on device (via telnet)")
 	daemon := flag.Bool("daemon", false, "run as a (foreground) daemon with polling webserver")
 	port := flag.Int("port", 8080, "webserver port (only used with -daemon)")
@@ -111,6 +112,11 @@ func main() {
 		return
 	}
 
+	if *toggle != "" {
+		p.toggle(true)
+		return
+	}
+
 	if *enable != "" {
 		switch *enable {
 		case "power":
@@ -141,6 +147,8 @@ func main() {
 			p.uptime()
 		case "info":
 			fmt.Println(p.infofull())
+		case "power":
+			p.toggle(false)
 		}
 		return
 	}

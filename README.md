@@ -29,10 +29,11 @@ $ plugctl
   -delay=1: polling delay of statistics in seconds (only used with -daemon)
   -disable="": disable power/cloud/ap
   -enable="": enable power/cloud/ap
-  -ip="192.168.8.74": ipv4 address of smartplug device
+  -ip="": ipv4 address of smartplug device
   -port=8080: webserver port (only used with -daemon)
   -raw="": raw command to execute on device (via telnet)
-  -show="": show info/uptime
+  -show="": show info/uptime/power
+  -toggle="": toggle power
 ```
 
 - enable
@@ -42,8 +43,12 @@ $ plugctl
 
 - disable: opposite of enable options above  
 
+- toggle:
+  * power: toggles power output of the plug
+
 - show
   * info: shows current Ampere - Watt - Watt/hour - Volt usage  
+  * power: shows if power output is on or off
   * uptime: show uptime of the device
    
 - raw "command": executes a command on the plug (it's running busybox/linux)  

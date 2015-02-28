@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -59,15 +60,47 @@ func (p *plug) reboot() {
 	p.exec(plugReboot)
 }
 
-func (p *plug) info(info string) string {
+func (p *plug) info(info string) (string, error) {
 	textarea := p.exec(plugInfo + info)
 	re := regexp.MustCompile("01(I|V|W|E)[0-9]+ 0*([0-9]+)")
 	result := re.FindStringSubmatch(textarea)
 	// if we don't have 2 matches something is wrong
 	if len(result) > 2 {
-		return (string(result[2]))
+		return string(result[2]), nil
 	} else {
-		return ("error")
+		return "", errors.New("info not found")
+	}
+}
+
+func (p *plug) toggle(reallytoggle bool) error {
+	status, err := p.status()
+	if err != nil {
+		return errors.New("Can't get power status")
+	}
+	if status == 1 {
+		fmt.Println("Power is on")
+		if reallytoggle {
+			p.disable()
+		}
+	} else {
+		fmt.Println("Power is off")
+		if reallytoggle {
+			p.enable()
+		}
+	}
+	return nil
+}
+
+func (p *plug) status() (int, error) {
+	result, err := p.info("W")
+	if err != nil {
+		return -1, err
+	}
+	resint, _ := strconv.Atoi(result)
+	if resint > 100 {
+		return 1, nil
+	} else {
+		return 0, nil
 	}
 }
 
