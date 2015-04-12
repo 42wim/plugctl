@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -262,6 +263,8 @@ func (p *plug) rawt(command string) {
 }
 
 func (p *plug) daemon() {
+	var diskwriter *csv.Writer
+	var gzipwriter *gzip.Writer
 	fmt.Println("starting foreground daemon ;-)")
 
 	// write csv from disk into the buffer
@@ -278,8 +281,16 @@ func (p *plug) daemon() {
 	// create a bufferwriter (appends to csv already in p.buffer)
 	bufferwriter := csv.NewWriter(&p.buffer)
 
-	// create a diskwriter (appends to csv on disk)
-	diskwriter := csv.NewWriter(csvfile)
+	// compressed or not
+	if strings.Contains(p.csvfile, ".gz") {
+		gzipwriter, _ = gzip.NewWriterLevel(csvfile, gzip.BestCompression)
+		defer gzipwriter.Close()
+		// wrap csv around gzipwriter
+		diskwriter = csv.NewWriter(gzipwriter)
+	} else {
+		// create a diskwriter (appends to csv on disk)
+		diskwriter = csv.NewWriter(csvfile)
+	}
 
 	// connect via telnet to the device and login
 	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
@@ -288,7 +299,7 @@ func (p *plug) daemon() {
 	}
 
 	// create http handlers
-	http.HandleFunc("/quit", webQuitHandler(diskwriter))
+	http.HandleFunc("/quit", webQuitHandler(diskwriter, gzipwriter, csvfile))
 	http.HandleFunc("/history", webHistoryHandler)
 	http.HandleFunc("/stream", webStreamHandler)
 	http.HandleFunc("/read.csv", webReadCsvHandler(p))
@@ -357,6 +368,9 @@ func (p *plug) daemon() {
 		// flush disk every 25 records
 		if recordcount%100 == 0 {
 			diskwriter.Flush()
+			if strings.Contains(p.csvfile, ".gz") {
+				gzipwriter.Flush()
+			}
 		}
 		// flush memory immediately
 		bufferwriter.Flush()

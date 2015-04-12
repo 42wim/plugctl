@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"code.google.com/p/gcfg"
+	"compress/gzip"
 	"encoding/csv"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +13,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"code.google.com/p/gcfg"
 )
 
 func checkErr(err error) {
@@ -56,13 +58,28 @@ func printResultSuccess(result string) {
 }
 
 func readcsv(csvfile string) []byte {
-	contents, err := ioutil.ReadFile(csvfile)
+	var err error
+	f, err := os.Open(csvfile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			// fmt.Println("file does not exist")
 		} else {
 			fmt.Println("error", err)
 		}
+		return []byte("")
+	}
+	defer f.Close()
+	if strings.Contains(csvfile, ".gz") {
+		f, err := gzip.NewReader(f)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer f.Close()
+	}
+	contents, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error", err)
+		return []byte("")
 	}
 	return contents
 }
@@ -90,10 +107,15 @@ func webStreamHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, webStream)
 }
 
-func webQuitHandler(diskwriter *csv.Writer) http.HandlerFunc {
+func webQuitHandler(diskwriter *csv.Writer, gzipwriter *gzip.Writer, csvfile *os.File) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "flushing to disk and shutting down")
 		diskwriter.Flush()
+		if gzipwriter != nil {
+			gzipwriter.Flush()
+			gzipwriter.Close()
+		}
+		csvfile.Close()
 		os.Exit(0)
 	}
 }
