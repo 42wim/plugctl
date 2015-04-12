@@ -20,6 +20,7 @@ type config struct {
 		Daemon      bool
 		WebWidth    string
 		WebHeight   string
+		Delay       int
 	}
 }
 
@@ -72,6 +73,9 @@ func main() {
 		if cfg.Main.WebWidth != "" {
 			webHistory = strings.Replace(webHistory, "##WebWidth##", cfg.Main.WebWidth, -1)
 			webStream = strings.Replace(webStream, "##WebWidth##", cfg.Main.WebWidth, -1)
+		}
+		if cfg.Main.Delay != 0 {
+			*delay = cfg.Main.Delay
 		}
 	}
 
