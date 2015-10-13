@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"io/ioutil"
 )
 
 type plug struct {
@@ -379,6 +380,94 @@ func (p *plug) daemon() {
 			fmt.Print(record)
 			fmt.Println(" took", time.Since(start))
 		}
+		// sleep the right amount of time
+		time.Sleep(time.Second*time.Duration(p.delay) - time.Since(start))
+	}
+}
+
+func (p *plug) daemonemon(emonapikey, emonurl string, emonnode int) {
+	fmt.Println("starting foreground emon daemon ;-)")
+
+	// connect via telnet to the device and login
+	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
+	if err != nil {
+		log.Fatal("can't connect")
+	}
+	
+	if emonapikey == "" {
+		log.Fatal("emon write apikey not specified")
+	}
+	
+	if emonurl == "" {
+		log.Fatal("emon url apikey not specified")
+	}
+
+	if strconv.Itoa(emonnode) == "0" {
+		log.Fatal("emon node not specified")
+	} 
+
+	// start infinite polling loop
+	for {
+		// measure how long it takes
+		start := time.Now()
+
+	//http://emoncms.org/input/post.json?node=1&csv=100,200,300&apikey=APIKEY
+	url := emonurl + "/input/post.json?node=" + strconv.Itoa(emonnode) + "&apikey=" + emonapikey + "&csv="
+
+		// get statistics from device and cleanup
+		status := sendln(conn, plugGetInfoStats, '#')
+		status = strings.Replace(status, plugGetInfoStats+"\r\n", "", 1)
+		status = strings.Replace(status, "#", "", 1)
+		// split up the 4 results a newline
+		results := strings.SplitN(status, "\r\n", 4)
+
+		re := regexp.MustCompile("01(I|V|W|E)[0-9]+ 0*([0-9]+)")
+		for i, result := range results {
+			match := re.FindStringSubmatch(result)
+			value := "0"
+			// check if we got the right size of slice
+			if len(match) == 3 {
+				value = match[2]
+			}
+
+			temp, _ := strconv.ParseFloat(value, 32)
+
+			switch i {
+			case 0:
+				// mAmp/10 -> Amp
+				value = strconv.FormatFloat(temp/10000, 'f', 2, 32)
+			// centiWatt -> Watt
+			case 1:
+				value = strconv.FormatFloat(temp/100, 'f', 2, 32)
+			// mWatt/h -> Watt/h | mVolt -> Volt
+			case 2, 3:
+				value = strconv.FormatFloat(temp/1000, 'f', 2, 32)
+			}
+			
+			if i < 3  {
+				url = url + value + ","		 
+			}  else {
+				url = url + value
+			}
+
+		}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("connection with emoncms failed!")
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("error reading response from emoncms")
+	}
+	fmt.Println("Response from emoncms:" + string(body))
+	
+		if debug {
+			fmt.Print(url)
+			fmt.Println(" took", time.Since(start))
+		}
+		
 		// sleep the right amount of time
 		time.Sleep(time.Second*time.Duration(p.delay) - time.Since(start))
 	}

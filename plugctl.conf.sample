@@ -6,4 +6,7 @@ csvfile=plug1.csv
 #webHeight=320
 #credentials=admin:admin
 #daemon
-
+#daemonemon
+#emonurl=http://www.emoncms.org
+#emonapikey=<writekeyfromemoncms>
+#emonnode=2

@@ -21,6 +21,10 @@ type config struct {
 		WebWidth    string
 		WebHeight   string
 		Delay       int
+		DaemonEmon  bool
+		EmonNode    int
+		EmonUrl     string
+		EmonApiKey  string
 	}
 }
 
@@ -40,6 +44,10 @@ func main() {
 	mydebug := flag.Bool("debug", false, "show debug information")
 	csvfile := flag.String("csvfile", "output.csv", "file to write csv output to (only used with -daemon)")
 	cfgfile := flag.String("conf", "", "a valid config file (uses plugctl.conf if exists)")
+	daemonemon := flag.Bool("daemonemon", false, "run as a (foreground) deamon which will send the data to emoncms")
+	emonnode := flag.Int("emonnode", 1, "node for emoncms where the data for emoncms will be transmitted to")
+	emonurl := flag.String("emonurl", "http://emoncms.org", "url of the emoncms (for ex. a local running version)")
+	emonapikey := flag.String("emonapikey", "", "the emoncms read/write api key displayed in your emoncms profile")
 
 	flag.Parse()
 
@@ -77,6 +85,18 @@ func main() {
 		if cfg.Main.Delay != 0 {
 			*delay = cfg.Main.Delay
 		}
+		if cfg.Main.DaemonEmon {
+			*daemonemon = true
+		}
+		if strconv.Itoa(cfg.Main.EmonNode) != "0" {
+			*emonnode = cfg.Main.EmonNode
+		}
+		if cfg.Main.EmonUrl != "" {
+			*emonurl = cfg.Main.EmonUrl
+		}
+		if cfg.Main.EmonApiKey != "" {
+			*emonapikey = cfg.Main.EmonApiKey
+		}
 	}
 
 	webHistory = strings.Replace(webHistory, "##WebHeight##", WebHeight, -1)
@@ -86,13 +106,13 @@ func main() {
 
 	debug = *mydebug
 
-	if len(os.Args) == 1 && !*daemon {
+	if (len(os.Args) == 1) && (!*daemon || !*daemonemon) {
 		flag.PrintDefaults()
 		return
 	}
 
 	if strings.Contains(*device, ":") == false {
-		if (!*daemon) && (*show != "info") && (*raw == "") {
+		if (!*daemon) && (!*daemonemon) && (*show != "info") && (*raw == "") {
 			*device = *device + ":80"
 		} else {
 			*device = *device + ":23"
@@ -113,6 +133,11 @@ func main() {
 		}
 		go http.Serve(listener, nil)
 		p.daemon()
+		return
+	}
+	
+	if *daemonemon {
+		p.daemonemon(*emonapikey, *emonurl, *emonnode)
 		return
 	}
 
