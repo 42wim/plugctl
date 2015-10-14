@@ -461,7 +461,9 @@ func (p *plug) daemonemon(emonapikey, emonurl string, emonnode int) {
 	if err != nil {
 		log.Fatal("error reading response from emoncms")
 	}
-	fmt.Println("Response from emoncms:" + string(body))
+	
+	t := time.Now()
+	fmt.Println(t.Format("2006/01/02 15:04:05") + " Response from emoncms:" + string(body))
 	
 		if debug {
 			fmt.Print(url)
