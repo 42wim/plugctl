@@ -88,10 +88,10 @@ when -daemonemon option is used data will be send to emoncms. Emoncms is Open-so
     and visualizers.
   * More info on Emoncms is availible on their website http://emoncms.org/
   
- ## Windows Watchdog
- Somtimes plugctl will not be able to connect to the device and will quit when this happens. For daemons this is not always
- wanted behaviour (eg with the -daemonemon or -daemon options). A sample windows batch file is included to start plugctl in a loop so that whenever plugctl quits
- it is automatically restarted (see Watchdog.bat.sample)
+## Windows Watchdog
+Somtimes plugctl will not be able to connect to the device and will quit when this happens. For daemons this is not always
+wanted behaviour (eg with the -daemonemon or -daemon options). A sample windows batch file is included to start plugctl in a loop so that whenever plugctl quits
+it is automatically restarted (see Watchdog.bat.sample)
 
 ## Examples
 Enable plug on ip 192.168.1.50 with login admin and password test
