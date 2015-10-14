@@ -388,23 +388,23 @@ func (p *plug) daemon() {
 func (p *plug) daemonemon(emonapikey, emonurl string, emonnode int) {
 	fmt.Println("starting foreground emon daemon ;-)")
 
-	// connect via telnet to the device and login
-	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
-	if err != nil {
-		log.Fatal("can't connect")
-	}
-	
 	if emonapikey == "" {
 		log.Fatal("emon write apikey not specified")
 	}
 	
 	if emonurl == "" {
-		log.Fatal("emon url apikey not specified")
+		log.Fatal("emon url not specified")
 	}
 
 	if strconv.Itoa(emonnode) == "0" {
 		log.Fatal("emon node not specified")
-	} 
+	}
+	
+	// connect via telnet to the device and login
+	conn, err := p.DialTimeout("tcp", p.device, time.Duration(time.Second*30))
+	if err != nil {
+		log.Fatal("can't connect")
+	}
 
 	// start infinite polling loop
 	for {
