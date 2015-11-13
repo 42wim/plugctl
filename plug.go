@@ -451,26 +451,30 @@ func (p *plug) daemonemon(emonapikey, emonurl string, emonnode int) {
 			}
 
 		}
-
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatal("connection with emoncms failed!")
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal("error reading response from emoncms")
-	}
-	
-	t := time.Now()
-	fmt.Println(t.Format("2006/01/02 15:04:05") + " Response from emoncms:" + string(body))
-	
 		if debug {
-			fmt.Print(url)
-			fmt.Println(" took", time.Since(start))
+			t1 := time.Now()
+			fmt.Println(t1.Format("2006/01/02 15:04:05") + " " + url)
+		}
+		resp, err := http.Get(url)
+		if err != nil {
+			log.Fatalln("connection with emoncms failed!", err)
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalln("error reading response from emoncms", err)
+		}
+
+		t := time.Now()
+		fmt.Print(t.Format("2006/01/02 15:04:05") + " Response from emoncms:" + string(body))
+		fmt.Println(" took", time.Since(start))
+		iSleep := time.Second*time.Duration(p.delay) - time.Since(start);
+
+		if debug {
+			fmt.Println("sleep amount:", iSleep)
 		}
 		
 		// sleep the right amount of time
-		time.Sleep(time.Second*time.Duration(p.delay) - time.Since(start))
+		time.Sleep(iSleep)
 	}
 }
