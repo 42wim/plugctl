@@ -24,9 +24,11 @@ func checkErr(err error) {
 }
 
 func sendln(conn net.Conn, s string, wait byte) string {
+	conn.SetDeadline(time.Now().Add(30 * time.Second));
 	_, err := fmt.Fprintf(conn, s+"\n")
 	checkErr(err)
 	time.Sleep(time.Millisecond * 50)
+	conn.SetDeadline(time.Now().Add(30 * time.Second));
 	status, err := bufio.NewReader(conn).ReadString(wait)
 	checkErr(err)
 	return status
