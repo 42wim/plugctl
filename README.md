@@ -31,6 +31,10 @@ $ plugctl
   -raw="": raw command to execute on device (via telnet)
   -show="": show info/uptime/power
   -toggle="": toggle power
+  -daemonemon=false: run as a (foreground) deamon which will send the data to emoncms
+  -emonnode=1: node for emoncms where the data for emoncms will be transmitted to")
+  -emonurl="http://emoncms.org": url of the emoncms (for ex. a local running version)
+  -emonapikey="": the emoncms read/write api key displayed in your emoncms profile
 ```
 
 - enable
@@ -55,13 +59,17 @@ $ plugctl
    > - port: specify listen port for the webserver (default 8080) (only needed with -daemon)
    > - csvfile: specify cvsfile to write to (default "output.csv") (only needed with -daemon)
 
+- daemonemon: polls the data and sends it to emoncms
+   > - emonnode: specify emon node where the data will be send to (default 1) (use one value per plug) (only needed with -daemonemon)
+   > - emonapikey: specify the write api key for emoncms (only needed with -daemonemon)  
+   > - emonurl: specify the emoncms url this can be a local version (default "http://emoncms.org") (only needed with -daemonemon)
+
 ## Configfile
 See plugctl.conf.sample (https://github.com/42wim/plugctl/blob/master/plugctl.conf.sample)
 
 If plugctl.conf exists in the current directory it will be used, otherwise a config file can specified using the -conf flag  
 
 E.g. The ip of your plug can be specified in plugctl.conf, so you don't need to give the -ip option with every command  
-
 
 ## Webserver
 When -daemon option is used, a webserver will listen by default on port 8080
@@ -72,6 +80,18 @@ When -daemon option is used, a webserver will listen by default on port 8080
 
   * /stream - webpage/javascript which shows a realtime chart
     ![stream](http://snag.gy/dCYY0.jpg)
+
+## Emoncms support
+when -daemonemon option is used data will be send to emoncms. Emoncms is Open-source energy visualisation software.
+
+  * You can run Emoncms on a raspberry pi, locally on a webserver (for ex. using wamp) or use the Emoncms directly and create al sorts of graphs
+    and visualizers.
+  * More info on Emoncms is availible on their website http://emoncms.org/
+  
+## Windows Watchdog
+Somtimes plugctl will not be able to connect to the device and will quit when this happens. For daemons this is not always
+wanted behaviour (eg with the -daemonemon or -daemon options). A sample windows batch file is included to start plugctl in a loop so that whenever plugctl quits
+it is automatically restarted (see Watchdog.bat.sample)
 
 ## Examples
 Enable plug on ip 192.168.1.50 with login admin and password test
@@ -121,7 +141,6 @@ $01V00 236728
 ```
 
 Start daemon/webserver on port 8888 with debug and device on ip 192.168.1.50 and save CSVfile to plug.csv
-
 ```
 $ plugctl -daemon -debug -port 8888 -ip 192.168.1.50 -csvfile plug.csv
 starting foreground daemon ;-)
@@ -131,3 +150,16 @@ starting foreground daemon ;-)
 
 You can now surf to http://localhost:8888/stream to see realtime chart updating.
 If you're running for a while or have historic data in plug.csv you can go to http://localhost:8888/history
+
+Start Emoncms daemon sending the data from device 192.168.0.110 with credentials admin:admin every 5 seconds to emoncms at http://emoncms.org on node 3
+```
+$plugctl -ip 192.168.0.110 -credentials admin:admin -daemonemon -emonnode 3 -emonapikey 00000000000000000000000000000000 -emonurl http://emoncms.org 
+starting foreground emon daemon ;-)
+Response from emoncms:ok
+Response from emoncms:ok
+```
+
+you should look for the "ok" response, if you get "" as a response something went wrong. Also please replace the emonapikey with your own key, in the example
+only zero's were used and this apikey is invalid. if you get the ok response you should be able to see the last send data on the inputs section in Emoncms.
+You can then start labeling the inputs. Key 1 = Amp, Key 2 = Watt, key 3 = kwh (cummulative from device) and key 4 = volt. After creating the input labels 
+you can start creating feeds for the inputs and once you have the feeds you can start creating dashboards with data visualizers using the feeds data

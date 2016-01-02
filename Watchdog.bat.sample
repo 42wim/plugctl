@@ -1,0 +1,5 @@
+@echo off
+:plugctl
+plugctl.exe -conf yourplugctl.conf
+echo PLUGCTL ENDED RESTARTING
+goto plugctl
